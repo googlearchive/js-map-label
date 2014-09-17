@@ -12,7 +12,7 @@ Migrated from the [Google Maps JavaScript API utility libraries on Google Code](
 
 ## Live Demo
 
-[![Earth API Screenshot](https://googlemaps.github.io/js-map-label/screenshot.png)](https://googlemaps.github.io/js-map-label/examples/maplabel.html)
+[![MapLabel Screenshot](https://googlemaps.github.io/js-map-label/screenshot.png)](https://googlemaps.github.io/js-map-label/examples/maplabel.html)
 
 [Example page](https://googlemaps.github.io/js-map-label/examples/maplabel.html)
 
