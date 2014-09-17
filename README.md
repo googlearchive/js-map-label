@@ -4,7 +4,6 @@ Map Label – A Google Maps JavaScript API utility library
 A library that adds well-styled, customizable text to a particular location in a Google Maps JavaScript API v3 map.
 
 Note that browser `<canvas>` support is required for the label to be displayed.
-
 ![Analytics](https://ga-beacon.appspot.com/UA-12846745-20/js-map-label/readme?pixel)
 
 [Reference documentation](https://googlemaps.github.io/js-map-label/docs/reference.html)
