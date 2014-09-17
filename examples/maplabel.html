@@ -1,26 +1,25 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
+    <meta charset="utf-8">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
-    <title>Map Label Utility Library</title>
-    <style type="text/css">
+    <title>Map Label Utility Library Example</title>
+    <style>
       body {
         font-family: sans-serif;
       }
     </style>
-    <script type="text/javascript"
-      src="http://maps.google.com/maps/api/js?sensor=false"></script>
-    <script type="text/javascript" src="../src/maplabel-compiled.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+    <script src="../src/maplabel-compiled.js"></script>
 
-    <script type="text/javascript">
+    <script>
       function init() {
         var myLatlng = new google.maps.LatLng(34.04, -118.24);
         var myOptions = {
           zoom: 13,
           center: myLatlng,
           mapTypeId: google.maps.MapTypeId.ROADMAP
-        }
+        };
 
         var map = new google.maps.Map(document.getElementById('map'), myOptions);
 
@@ -33,7 +32,7 @@
         });
         mapLabel.set('position', new google.maps.LatLng(34.03, -118.235));
 
-        var marker = new google.maps.Marker;
+        var marker = new google.maps.Marker();
         marker.bindTo('map', mapLabel);
         marker.bindTo('position', mapLabel);
         marker.setDraggable(true);
@@ -74,11 +73,22 @@
 
         var move = document.getElementById('move');
         google.maps.event.addDomListener(move, 'click', function() {
-          mapLabel.setMap(mapLabel.getMap() == map ? map2 : map);
+          mapLabel.setMap(mapLabel.getMap() === map ? map2 : map);
         });
       }
 
       google.maps.event.addDomListener(window, 'load', init);
+    </script>
+    <script>
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-12846745-20']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' === document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
     </script>
   </head>
   <body>
@@ -122,16 +132,5 @@
       </select>
       <button id="change-align">Align</button>
     </div>
-    <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-12846745-16']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    </script>
   </body>
 </html>
