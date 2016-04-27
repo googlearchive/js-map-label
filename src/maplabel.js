@@ -30,6 +30,12 @@
  * @param {Object.<string, *>=} opt_options Optional properties to set.
  */
 function MapLabel(opt_options) {
+  if (!MapLabel.prototype.setValues) {
+    for (var property in google.maps.OverlayView.prototype) {
+      MapLabel.prototype[property] = google.maps.OverlayView.prototype[property];
+    }
+  }
+
   this.set('fontFamily', 'sans-serif');
   this.set('fontSize', 12);
   this.set('fontColor', '#000000');
@@ -41,7 +47,6 @@ function MapLabel(opt_options) {
 
   this.setValues(opt_options);
 }
-MapLabel.prototype = new google.maps.OverlayView;
 
 window['MapLabel'] = MapLabel;
 
