@@ -117,7 +117,7 @@ MapLabel.prototype.onAdd = function() {
 
   var panes = this.getPanes();
   if (panes) {
-    panes.mapPane.appendChild(canvas);
+    panes.overlayLayer.appendChild(canvas);
   }
 };
 MapLabel.prototype['onAdd'] = MapLabel.prototype.onAdd;
