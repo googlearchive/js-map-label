@@ -36,13 +36,12 @@ function MapLabel(opt_options) {
     }
   }
 
-  this.set('fontFamily', 'sans-serif');
-  this.set('fontSize', 12);
-  this.set('fontColor', '#000000');
-  this.set('strokeWeight', 4);
-  this.set('strokeColor', '#ffffff');
   this.set('align', 'center');
-
+  this.set('fontColor', '#000000');
+  this.set('fontFamily', 'Roboto,Arial,sans-serif');
+  this.set('fontSize', 12);
+  this.set('strokeColor', '#ffffff');
+  this.set('strokeWeight', 4);
   this.set('zIndex', 1e3);
 
   this.setValues(opt_options);
