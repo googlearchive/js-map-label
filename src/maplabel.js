@@ -88,7 +88,7 @@ MapLabel.prototype.drawCanvas_ = function() {
   var textMeasure = ctx.measureText(text);
 
   canvas.width = Math.ceil(textMeasure.width + strokeWeight * 2);
-  canvas.height = Math.ceil(parseInt(this.get('fontSize')) + strokeWeight * 2);
+  canvas.height = Math.ceil(parseInt(this.get('fontSize'), 10) + strokeWeight * 2);
 
   if (window.devicePixelRatio > 1) {
     style.width = canvas.width + 'px';
@@ -156,7 +156,6 @@ MapLabel.prototype.draw = function() {
   var style = this.canvas_.style;
 
   style['top'] = pos.y + 'px';
-  //style['left'] = pos.x + 'px';
 
   switch(this.get('align')) {
     case 'left':
@@ -170,7 +169,7 @@ MapLabel.prototype.draw = function() {
       style['left'] = pos.x + 'px';
       break;
     default:
-      style['margin-top'] = '1em'; //'1em';
+      style['margin-top'] = '1em';
       style['left'] = (pos.x - (this.canvas_.width / (window.devicePixelRatio ? window.devicePixelRatio : 1)) / 2) + 'px';
   }
 
