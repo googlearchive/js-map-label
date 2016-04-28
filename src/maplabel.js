@@ -1,3 +1,8 @@
+// ==ClosureCompiler==
+// @output_file_name maplabels-compiled.js
+// @compilation_level ADVANCED_OPTIMIZATIONS
+// @externs_url https://raw.githubusercontent.com/google/closure-compiler/master/contrib/externs/maps/google_maps_api_v3.js
+// ==/ClosureCompiler==
 /**
  * @license
  *
@@ -29,7 +34,7 @@
  * @extends google.maps.OverlayView
  * @param {Object.<string, *>=} opt_options Optional properties to set.
  */
-function MapLabel(opt_options) {
+MapLabel = function(opt_options) {
   if (!MapLabel.prototype.setValues) {
     for (var property in google.maps.OverlayView.prototype) {
       if(!MapLabel.prototype.hasOwnProperty(property)) {
