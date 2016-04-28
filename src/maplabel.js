@@ -32,7 +32,9 @@
 function MapLabel(opt_options) {
   if (!MapLabel.prototype.setValues) {
     for (var property in google.maps.OverlayView.prototype) {
-      MapLabel.prototype[property] = google.maps.OverlayView.prototype[property];
+      if(!MapLabel.prototype.hasOwnProperty(property)) {
+        MapLabel.prototype[property] = google.maps.OverlayView.prototype[property];
+      }
     }
   }
 
@@ -58,9 +60,9 @@ MapLabel.prototype.changed = function(prop) {
     case 'fontColor':
     case 'strokeWeight':
     case 'strokeColor':
-    case 'align':
     case 'text':
-      return this.drawCanvas_();
+      this.drawCanvas_();
+    case 'align':
     case 'maxZoom':
     case 'minZoom':
     case 'position':
@@ -164,13 +166,14 @@ MapLabel.prototype.draw = function() {
       style['margin-top'] = '-0.4em';
       break;
     case 'right':
-      style['margin-top'] = '-0.4em';
-      style['margin-left'] = '1em';
       style['left'] = pos.x + 'px';
+      style['margin-left'] = '1em';
+      style['margin-top'] = '-0.4em';
       break;
     default:
-      style['margin-top'] = '1em';
       style['left'] = (pos.x - (this.canvas_.width / (window.devicePixelRatio ? window.devicePixelRatio : 1)) / 2) + 'px';
+      style['margin-left'] = 0;
+      style['margin-top'] = '1em';
   }
 
   style['visibility'] = this.getVisible_();
