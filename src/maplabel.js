@@ -175,15 +175,11 @@ MapLabel.prototype.getMarginLeft_ = function(textWidth) {
 MapLabel.prototype.draw = function() {
   var projection = this.getProjection();
 
-  if (!projection) {
-    // The map projection is not ready yet so do nothing
-    return;
-  }
+  if (!projection)
+    return; // The map projection is not ready yet so do nothing
 
-  if (!this.canvas_) {
-    // onAdd has not been called yet.
-    return;
-  }
+  if (!this.canvas_)
+    return; // onAdd has not been called yet.
 
   var latLng = /** @type {google.maps.LatLng} */ (this.get('position'));
   if (!latLng) {
