@@ -37,6 +37,7 @@ function MapLabel(opt_options) {
   this.set('strokeWeight', 4);
   this.set('strokeColor', '#ffffff');
   this.set('align', 'center');
+  this.set('marginTop', '-0.4em');
 
   this.set('zIndex', 1e3);
 
@@ -74,6 +75,7 @@ MapLabel.prototype.changed = function(prop) {
     case 'fontColor':
     case 'strokeWeight':
     case 'strokeColor':
+    case 'marginTop':
     case 'align':
     case 'text':
       return this.drawCanvas_();
@@ -115,9 +117,9 @@ MapLabel.prototype.drawCanvas_ = function() {
     var textMeasure = ctx.measureText(text);
     var textWidth = textMeasure.width + strokeWeight;
     style.marginLeft = this.getMarginLeft_(textWidth) + 'px';
-    // Bring actual text top in line with desired latitude.
+    // With the default value, bring actual text top in line with desired latitude.
     // Cheaper than calculating height of text.
-    style.marginTop = '-0.4em';
+    style.marginTop = /** @type string */(this.get('marginTop'));
   }
 };
 
