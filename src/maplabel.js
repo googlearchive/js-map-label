@@ -159,6 +159,7 @@ MapLabel.prototype['onAdd'] = MapLabel.prototype.onAdd;
  * @return {number} the margin-left, in pixels.
  */
 MapLabel.prototype.getMarginLeft_ = function(textWidth) {
+  textWidth = Math.min(textWidth, this.canvas_.width);
   switch (this.get('align')) {
     case 'left':
       return 0;
