@@ -29,6 +29,7 @@
  * @extends google.maps.OverlayView
  * @param {Object.<string, *>=} opt_options Optional properties to set.
  */
+(function() {
 function MapLabel(opt_options) {
   this.set('fontFamily', 'sans-serif');
   this.set('fontSize', 12);
@@ -41,10 +42,29 @@ function MapLabel(opt_options) {
 
   this.setValues(opt_options);
 }
-MapLabel.prototype = new google.maps.OverlayView;
+// Expose in the namespace googlemaps.jsMapLabel
+var googlemaps = window.googlemaps = window.googlemaps || {};
+var jsMapLabel = googlemaps.jsMapLabel = googlemaps.jsMapLabel || {};
+jsMapLabel.initDone = false;
+// See if we have google maps available already and can do the init right now
+if(window.google && google.maps && google.maps.OverlayView) {
+  MapLabel.prototype = new google.maps.OverlayView;
+  jsMapLabel.initDone = true;
+}
 
-window['MapLabel'] = MapLabel;
-
+jsMapLabel.MapLabel = MapLabel;
+// If google maps is loaded asynchronously, the library user can call googlemaps.jsMapLabel.init(google.maps) from within their callback function passed to the Google Maps script URL
+jsMapLabel.init = function(maps) {
+  if(jsMapLabel.initDone)
+    return;
+  var proto = MapLabel.prototype;
+  MapLabel.prototype = new maps.OverlayView;
+  for (var property in proto) { // Copy all the functions this lib defined over into the new protoype
+    if (proto.hasOwnProperty(property))
+        MapLabel.prototype[property] = proto[property];
+  }
+  jsMapLabel.initDone = true;
+}
 
 /** @inheritDoc */
 MapLabel.prototype.changed = function(prop) {
@@ -204,3 +224,4 @@ MapLabel.prototype.onRemove = function() {
   }
 };
 MapLabel.prototype['onRemove'] = MapLabel.prototype.onRemove;
+})();
