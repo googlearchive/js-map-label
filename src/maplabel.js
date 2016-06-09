@@ -128,6 +128,14 @@ MapLabel.prototype.onAdd = function() {
   var canvas = this.canvas_ = document.createElement('canvas');
   var style = canvas.style;
   style.position = 'absolute';
+  
+  // support high DPI screens
+  if (window.devicePixelRatio > 1) {
+    var width = 250;
+    var size = width * window.devicePixelRatio;
+    canvas.width = canvas.height = size;
+    style.width = style.height = size + 'px';
+  }
 
   var ctx = canvas.getContext('2d');
   ctx.lineJoin = 'round';
@@ -137,7 +145,7 @@ MapLabel.prototype.onAdd = function() {
 
   var panes = this.getPanes();
   if (panes) {
-    panes.mapPane.appendChild(canvas);
+    panes.overlayMouseTarget.appendChild(canvas);
   }
 };
 MapLabel.prototype['onAdd'] = MapLabel.prototype.onAdd;
