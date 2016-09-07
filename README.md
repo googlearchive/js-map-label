@@ -1,3 +1,5 @@
+**Please note:** This repository is not currently maintained, and is kept for historical purpose only.
+
 Map Label – A Google Maps JavaScript API utility library
 ==============
 
