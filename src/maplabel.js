@@ -1,3 +1,8 @@
+// ==ClosureCompiler==
+// @output_file_name maplabels-compiled.js
+// @compilation_level ADVANCED_OPTIMIZATIONS
+// @externs_url https://raw.githubusercontent.com/google/closure-compiler/master/contrib/externs/maps/google_maps_api_v3.js
+// ==/ClosureCompiler==
 /**
  * @license
  *
@@ -29,19 +34,25 @@
  * @extends google.maps.OverlayView
  * @param {Object.<string, *>=} opt_options Optional properties to set.
  */
-function MapLabel(opt_options) {
-  this.set('fontFamily', 'sans-serif');
-  this.set('fontSize', 12);
-  this.set('fontColor', '#000000');
-  this.set('strokeWeight', 4);
-  this.set('strokeColor', '#ffffff');
-  this.set('align', 'center');
+MapLabel = function(opt_options) {
+  if (!MapLabel.prototype.setValues) {
+    for (var property in google.maps.OverlayView.prototype) {
+      if(!MapLabel.prototype.hasOwnProperty(property)) {
+        MapLabel.prototype[property] = google.maps.OverlayView.prototype[property];
+      }
+    }
+  }
 
+  this.set('align', 'center');
+  this.set('fontColor', '#000000');
+  this.set('fontFamily', 'Roboto,Arial,sans-serif');
+  this.set('fontSize', 12);
+  this.set('strokeColor', '#ffffff');
+  this.set('strokeWeight', 4);
   this.set('zIndex', 1e3);
 
   this.setValues(opt_options);
 }
-MapLabel.prototype = new google.maps.OverlayView;
 
 window['MapLabel'] = MapLabel;
 
@@ -54,9 +65,9 @@ MapLabel.prototype.changed = function(prop) {
     case 'fontColor':
     case 'strokeWeight':
     case 'strokeColor':
-    case 'align':
     case 'text':
-      return this.drawCanvas_();
+      this.drawCanvas_();
+    case 'align':
     case 'maxZoom':
     case 'minZoom':
     case 'position':
@@ -73,17 +84,35 @@ MapLabel.prototype.drawCanvas_ = function() {
   if (!canvas) return;
 
   var style = canvas.style;
+  style.position = 'absolute';
   style.zIndex = /** @type number */(this.get('zIndex'));
 
   var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.strokeStyle = this.get('strokeColor');
-  ctx.fillStyle = this.get('fontColor');
   ctx.font = this.get('fontSize') + 'px ' + this.get('fontFamily');
 
   var strokeWeight = Number(this.get('strokeWeight'));
-
   var text = this.get('text');
+  var textMeasure = ctx.measureText(text);
+
+  canvas.width = Math.ceil(textMeasure.width + strokeWeight * 2);
+  canvas.height = Math.ceil(parseInt(this.get('fontSize'), 10) + strokeWeight * 2);
+
+  if (window.devicePixelRatio > 1) {
+    style.width = canvas.width + 'px';
+    style.height = canvas.height + 'px';
+    canvas.width = canvas.width * window.devicePixelRatio;
+    canvas.height = canvas.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+
+  ctx.lineJoin = 'round';
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'left';
+  ctx.strokeStyle = this.get('strokeColor');
+  ctx.fillStyle = this.get('fontColor');
+  ctx.font = this.get('fontSize') + 'px ' + this.get('fontFamily');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   if (text) {
     if (strokeWeight) {
       ctx.lineWidth = strokeWeight;
@@ -91,13 +120,6 @@ MapLabel.prototype.drawCanvas_ = function() {
     }
 
     ctx.fillText(text, strokeWeight, strokeWeight);
-
-    var textMeasure = ctx.measureText(text);
-    var textWidth = textMeasure.width + strokeWeight;
-    style.marginLeft = this.getMarginLeft_(textWidth) + 'px';
-    // Bring actual text top in line with desired latitude.
-    // Cheaper than calculating height of text.
-    style.marginTop = '-0.4em';
   }
 };
 
@@ -106,37 +128,15 @@ MapLabel.prototype.drawCanvas_ = function() {
  */
 MapLabel.prototype.onAdd = function() {
   var canvas = this.canvas_ = document.createElement('canvas');
-  var style = canvas.style;
-  style.position = 'absolute';
-
-  var ctx = canvas.getContext('2d');
-  ctx.lineJoin = 'round';
-  ctx.textBaseline = 'top';
 
   this.drawCanvas_();
 
   var panes = this.getPanes();
   if (panes) {
-    panes.mapPane.appendChild(canvas);
+    panes.overlayLayer.appendChild(canvas);
   }
 };
 MapLabel.prototype['onAdd'] = MapLabel.prototype.onAdd;
-
-/**
- * Gets the appropriate margin-left for the canvas.
- * @private
- * @param {number} textWidth  the width of the text, in pixels.
- * @return {number} the margin-left, in pixels.
- */
-MapLabel.prototype.getMarginLeft_ = function(textWidth) {
-  switch (this.get('align')) {
-    case 'left':
-      return 0;
-    case 'right':
-      return -textWidth;
-  }
-  return textWidth / -2;
-};
 
 /**
  * @inheritDoc
@@ -163,7 +163,23 @@ MapLabel.prototype.draw = function() {
   var style = this.canvas_.style;
 
   style['top'] = pos.y + 'px';
-  style['left'] = pos.x + 'px';
+
+  switch(this.get('align')) {
+    case 'left':
+      style['left'] = pos.x - (this.canvas_.width / (window.devicePixelRatio ? window.devicePixelRatio : 1)) + 'px';
+      style['margin-left'] = '-1em';
+      style['margin-top'] = '-0.4em';
+      break;
+    case 'right':
+      style['left'] = pos.x + 'px';
+      style['margin-left'] = '1em';
+      style['margin-top'] = '-0.4em';
+      break;
+    default:
+      style['left'] = (pos.x - (this.canvas_.width / (window.devicePixelRatio ? window.devicePixelRatio : 1)) / 2) + 'px';
+      style['margin-left'] = 0;
+      style['margin-top'] = '1em';
+  }
 
   style['visibility'] = this.getVisible_();
 };
