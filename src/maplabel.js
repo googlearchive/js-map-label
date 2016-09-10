@@ -162,7 +162,7 @@ MapLabel.prototype.draw = function() {
 
   var style = this.canvas_.style;
 
-  style['top'] = pos.y + 'px';
+  style['top'] = pos.y - (this.get('fontSize') /2) + 'px';
   style['left'] = pos.x + 'px';
 
   style['visibility'] = this.getVisible_();
