@@ -29,6 +29,7 @@
  * @extends google.maps.OverlayView
  * @param {Object.<string, *>=} opt_options Optional properties to set.
  */
+(function() {
 function MapLabel(opt_options) {
   this.set('fontFamily', 'sans-serif');
   this.set('fontSize', 12);
@@ -36,15 +37,35 @@ function MapLabel(opt_options) {
   this.set('strokeWeight', 4);
   this.set('strokeColor', '#ffffff');
   this.set('align', 'center');
+  this.set('marginTop', '-0.4em');
 
   this.set('zIndex', 1e3);
 
   this.setValues(opt_options);
 }
-MapLabel.prototype = new google.maps.OverlayView;
+// Expose in the namespace googlemaps.jsMapLabel
+var googlemaps = window.googlemaps = window.googlemaps || {};
+var jsMapLabel = googlemaps.jsMapLabel = googlemaps.jsMapLabel || {};
+jsMapLabel.initDone = false;
+// See if we have google maps available already and can do the init right now
+if(window.google && google.maps && google.maps.OverlayView) {
+  MapLabel.prototype = new google.maps.OverlayView;
+  jsMapLabel.initDone = true;
+}
 
-window['MapLabel'] = MapLabel;
-
+jsMapLabel.MapLabel = MapLabel;
+// If google maps is loaded asynchronously, the library user can call googlemaps.jsMapLabel.init(google.maps) from within their callback function passed to the Google Maps script URL
+jsMapLabel.init = function(maps) {
+  if(jsMapLabel.initDone)
+    return;
+  var proto = MapLabel.prototype;
+  MapLabel.prototype = new maps.OverlayView;
+  for (var property in proto) { // Copy all the functions this lib defined over into the new protoype
+    if (proto.hasOwnProperty(property))
+        MapLabel.prototype[property] = proto[property];
+  }
+  jsMapLabel.initDone = true;
+}
 
 /** @inheritDoc */
 MapLabel.prototype.changed = function(prop) {
@@ -54,6 +75,7 @@ MapLabel.prototype.changed = function(prop) {
     case 'fontColor':
     case 'strokeWeight':
     case 'strokeColor':
+    case 'marginTop':
     case 'align':
     case 'text':
       return this.drawCanvas_();
@@ -95,9 +117,9 @@ MapLabel.prototype.drawCanvas_ = function() {
     var textMeasure = ctx.measureText(text);
     var textWidth = textMeasure.width + strokeWeight;
     style.marginLeft = this.getMarginLeft_(textWidth) + 'px';
-    // Bring actual text top in line with desired latitude.
+    // With the default value, bring actual text top in line with desired latitude.
     // Cheaper than calculating height of text.
-    style.marginTop = '-0.4em';
+    style.marginTop = /** @type string */(this.get('marginTop'));
   }
 };
 
@@ -108,6 +130,14 @@ MapLabel.prototype.onAdd = function() {
   var canvas = this.canvas_ = document.createElement('canvas');
   var style = canvas.style;
   style.position = 'absolute';
+  
+  // support high DPI screens
+  if (window.devicePixelRatio > 1) {
+    var width = 250;
+    var size = width * window.devicePixelRatio;
+    canvas.width = canvas.height = size;
+    style.width = style.height = size + 'px';
+  }
 
   var ctx = canvas.getContext('2d');
   ctx.lineJoin = 'round';
@@ -117,7 +147,7 @@ MapLabel.prototype.onAdd = function() {
 
   var panes = this.getPanes();
   if (panes) {
-    panes.mapPane.appendChild(canvas);
+    panes.overlayMouseTarget.appendChild(canvas);
   }
 };
 MapLabel.prototype['onAdd'] = MapLabel.prototype.onAdd;
@@ -129,6 +159,7 @@ MapLabel.prototype['onAdd'] = MapLabel.prototype.onAdd;
  * @return {number} the margin-left, in pixels.
  */
 MapLabel.prototype.getMarginLeft_ = function(textWidth) {
+  textWidth = Math.min(textWidth, this.canvas_.width);
   switch (this.get('align')) {
     case 'left':
       return 0;
@@ -144,15 +175,11 @@ MapLabel.prototype.getMarginLeft_ = function(textWidth) {
 MapLabel.prototype.draw = function() {
   var projection = this.getProjection();
 
-  if (!projection) {
-    // The map projection is not ready yet so do nothing
-    return;
-  }
+  if (!projection)
+    return; // The map projection is not ready yet so do nothing
 
-  if (!this.canvas_) {
-    // onAdd has not been called yet.
-    return;
-  }
+  if (!this.canvas_)
+    return; // onAdd has not been called yet.
 
   var latLng = /** @type {google.maps.LatLng} */ (this.get('position'));
   if (!latLng) {
@@ -204,3 +231,4 @@ MapLabel.prototype.onRemove = function() {
   }
 };
 MapLabel.prototype['onRemove'] = MapLabel.prototype.onRemove;
+})();
