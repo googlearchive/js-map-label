@@ -40,6 +40,7 @@ function MapLabel(opt_options) {
   this.set('padding', 0);
   // Canvas sets lineWidth as 1.0 by default
   this.set('backgroundStrokeWeight', 1);
+  this.set('backgroundStrokeColor', '#ffffff');
   this.set('borderRadius', 0);
 
   this.set('zIndex', 1e3);
