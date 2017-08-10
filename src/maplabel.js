@@ -37,6 +37,11 @@ function MapLabel(opt_options) {
   this.set('strokeColor', '#ffffff');
   this.set('align', 'center');
 
+  this.set('padding', 0);
+  // Canvas sets lineWidth as 1.0 by default
+  this.set('backgroundStrokeWeight', 1);
+  this.set('borderRadius', 0);
+
   this.set('zIndex', 1e3);
 
   this.setValues(opt_options);
@@ -77,28 +82,49 @@ MapLabel.prototype.drawCanvas_ = function() {
 
   var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  var text = this.get('text');
+  if (!text) return;
+
+  var fontSize = this.get('fontSize');
+  var textX = 0;
+  var textY = 0;
+  var strokeWeight = Number(this.get('strokeWeight'));
+  ctx.font = fontSize + 'px ' + this.get('fontFamily');
+  // Text must be measured after setting ctx.font for accurate results
+  var textMeasure = ctx.measureText(text);
+
+  var backgroundColor = this.get('backgroundColor');
+  // Draw background (if specified) before text
+  if (backgroundColor) {
+    // Setup background dimensions
+    var padding = Number(this.get('padding'));
+    var bgStrokeWeight = Number(this.get('backgroundStrokeWeight'));
+    var rectWidth = (textMeasure.width + strokeWeight + bgStrokeWeight) + (2 * padding);
+    var rectHeight = (fontSize + strokeWeight + bgStrokeWeight) + (2 * padding);
+    var radius = this.get('borderRadius');
+    var bgStrokeColor = this.get('backgroundStrokeColor');
+    var offset = bgStrokeWeight;
+    console.log(offset, bgStrokeWeight);
+    // Draw rect.
+    roundRect(ctx, offset, rectWidth, rectHeight, radius, backgroundColor, bgStrokeColor, bgStrokeWeight);
+    // Prepare text to be centered in the background
+    // strokeWeight is include in rect dimensions, but is added later in all cases.
+    // remove strokeWeight so that it is not included twice in the text's x and y
+    textX = offset + (rectWidth / 2) - strokeWeight;
+    textY = offset + (rectHeight / 2) - strokeWeight;
+    // Alignment must be centered when using a background
+    ctx.textAlign="center"; 
+    ctx.textBaseline = "middle";
+  }
+  
   ctx.strokeStyle = this.get('strokeColor');
   ctx.fillStyle = this.get('fontColor');
-  ctx.font = this.get('fontSize') + 'px ' + this.get('fontFamily');
-
-  var strokeWeight = Number(this.get('strokeWeight'));
-
-  var text = this.get('text');
-  if (text) {
-    if (strokeWeight) {
-      ctx.lineWidth = strokeWeight;
-      ctx.strokeText(text, strokeWeight, strokeWeight);
-    }
-
-    ctx.fillText(text, strokeWeight, strokeWeight);
-
-    var textMeasure = ctx.measureText(text);
-    var textWidth = textMeasure.width + strokeWeight;
-    style.marginLeft = this.getMarginLeft_(textWidth) + 'px';
-    // Bring actual text top in line with desired latitude.
-    // Cheaper than calculating height of text.
-    style.marginTop = '-0.4em';
+  if (strokeWeight) {
+    ctx.lineWidth = strokeWeight;
+    ctx.strokeText(text, textX + strokeWeight, textY + strokeWeight);
   }
+  ctx.fillText(text, textX + strokeWeight, textY + strokeWeight);
 };
 
 /**
@@ -204,3 +230,40 @@ MapLabel.prototype.onRemove = function() {
   }
 };
 MapLabel.prototype['onRemove'] = MapLabel.prototype.onRemove;
+
+/**
+ * Draws a rounded rectangle.
+ * TODO: Put this somewhere better?
+ */
+function roundRect(ctx, offset, width, height, radius, fill, stroke, strokeWeight) {
+  var x = offset;
+  var y = offset;
+  if (typeof radius === 'number') {
+    radius = {tl: radius, tr: radius, br: radius, bl: radius};
+  } else {
+    var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+    for (var side in defaultRadius) {
+      radius[side] = radius[side] || defaultRadius[side];
+    }
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius.tl, y);
+  ctx.lineTo(x + width - radius.tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+  ctx.lineTo(x + width, y + height - radius.br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+  ctx.lineTo(x + radius.bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+  ctx.lineTo(x, y + radius.tl);
+  ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = strokeWeight;
+    ctx.stroke();
+  }
+}
